@@ -86,3 +86,8 @@ backend.log
 backend_log.txt
 frontend/frontend.log
 AGENTS.md
+PROJECT_SPEC.md
+frontend-design-universal.md
+/docs/
+/deploy/README.md
+/tests/test_report.md
