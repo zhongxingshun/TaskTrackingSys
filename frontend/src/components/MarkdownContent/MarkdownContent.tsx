@@ -3,11 +3,45 @@
  * 支持渲染图片、链接等 Markdown 元素
  */
 
+import { useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 interface MarkdownContentProps {
     content: string;
     className?: string;
+}
+
+function MarkdownImage({ src, alt }: { src?: string; alt?: string }) {
+    const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+    const [retryCount, setRetryCount] = useState(0);
+
+    const handleError = useCallback(() => {
+        if (retryCount < 3) {
+            setRetryCount((c) => c + 1);
+            setStatus('loading');
+        } else {
+            setStatus('error');
+        }
+    }, [retryCount]);
+
+    if (status === 'error') {
+        return (
+            <div className="text-sm text-red-500 bg-red-50 p-2 rounded my-2">
+                图片加载失败: {src}
+            </div>
+        );
+    }
+
+    return (
+        <img
+            key={retryCount}
+            src={src}
+            alt={alt || '图片'}
+            className="max-w-full h-auto rounded-lg my-2 shadow-sm border border-gray-200"
+            onLoad={() => setStatus('loaded')}
+            onError={handleError}
+        />
+    );
 }
 
 export function MarkdownContent({ content, className = '' }: MarkdownContentProps) {
@@ -16,23 +50,7 @@ export function MarkdownContent({ content, className = '' }: MarkdownContentProp
             <ReactMarkdown
                 components={{
                     // 自定义图片渲染
-                    img: ({ src, alt }) => (
-                        <img
-                            src={src}
-                            alt={alt || '图片'}
-                            className="max-w-full h-auto rounded-lg my-2 shadow-sm border border-gray-200"
-                            loading="lazy"
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                // 创建错误提示
-                                const errorDiv = document.createElement('div');
-                                errorDiv.className = 'text-sm text-red-500 bg-red-50 p-2 rounded my-2';
-                                errorDiv.textContent = `图片加载失败: ${src}`;
-                                target.parentNode?.insertBefore(errorDiv, target);
-                            }}
-                        />
-                    ),
+                    img: ({ src, alt }) => <MarkdownImage src={src} alt={alt} />,
                     // 自定义链接渲染
                     a: ({ href, children }) => (
                         <a
