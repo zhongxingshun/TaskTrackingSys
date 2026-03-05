@@ -85,3 +85,4 @@ backend/backups/
 backend.log
 backend_log.txt
 frontend/frontend.log
+AGENTS.md
