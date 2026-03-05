@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: taskflow-backend
+    restart: unless-stopped
+    volumes:
+      - taskflow-data:/data
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:////data/taskflow.db
+      - UPLOAD_DIR=/data/uploads
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-please-change-this-secret-key}
+      - CORS_ORIGINS=*
+      - APP_ENV=production
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: taskflow-frontend
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  taskflow-data:

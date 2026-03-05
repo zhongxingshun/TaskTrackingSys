@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*.egg-info
+.pytest_cache
+.mypy_cache
+.coverage
+htmlcov
+
+# Virtual Environment
+backend/venv
+backend/.venv
+
+# Node
+frontend/node_modules
+
+# IDE
+.idea
+.vscode
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database (不打包本地数据库)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs
+
+# Deploy (旧部署脚本)
+deploy
+
+# Project docs
+project_document
+backups
+
+# Docker
+docker-compose*.yml
+Dockerfile*
