@@ -3,7 +3,7 @@
  * 支持渲染图片、链接等 Markdown 元素
  */
 
-import { useState, useCallback, useMemo, memo } from 'react';
+import { useState, useCallback, memo } from 'react';
 import ReactMarkdown, { Components } from 'react-markdown';
 
 interface MarkdownContentProps {
