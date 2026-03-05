@@ -58,7 +58,7 @@ push_to_github() {
         fi
     fi
 
-    git -c http.proxy="${LOCAL_PROXY}" push origin main
+    git push origin main
     ok "代码已推送到 GitHub"
 }
 
