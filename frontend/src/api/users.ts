@@ -30,4 +30,14 @@ export const usersApi = {
     async getCurrentUser(): Promise<UserInfo> {
         return apiClient.get('/auth/me');
     },
+
+    /**
+     * 修改密码
+     */
+    async changePassword(oldPassword: string, newPassword: string): Promise<{ message: string }> {
+        return apiClient.post('/auth/change-password', {
+            old_password: oldPassword,
+            new_password: newPassword,
+        });
+    },
 };

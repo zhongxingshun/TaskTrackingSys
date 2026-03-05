@@ -9,7 +9,7 @@ import { KanbanBoard } from './components/Kanban';
 import { TaskDrawer } from './components/TaskDrawer';
 import { TaskDialog } from './components/TaskDialog';
 import { FilterBar } from './components/FilterBar';
-import { Plus, RefreshCw, Settings, LogOut } from 'lucide-react';
+import { Plus, RefreshCw, Settings, LogOut, KeyRound } from 'lucide-react';
 import { tasksApi, devicesApi, usersApi } from './api';
 import { Task, Device, TaskFilters, TaskCreate, TaskUpdate, TaskStatus } from './types';
 import { LoginPage } from './pages/LoginPage';
@@ -48,6 +48,10 @@ function App() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [filters, setFilters] = useState<TaskFilters>({});
   const [myTracking, setMyTracking] = useState(false);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
 
   // 处理登录
@@ -406,6 +410,17 @@ function App() {
                     </span>
                   )}
                   <button
+                    onClick={() => {
+                      setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+                      setPasswordError('');
+                      setIsPasswordDialogOpen(true);
+                    }}
+                    className="btn-ghost flex items-center gap-1 text-sm"
+                    title="修改密码"
+                  >
+                    <KeyRound size={16} />
+                  </button>
+                  <button
                     onClick={handleLogout}
                     className="btn-ghost flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
                     title="退出登录"
@@ -513,6 +528,85 @@ function App() {
           onStatusChange={async () => { }}
           mode="create"
         />
+
+        {/* 修改密码弹窗 */}
+        {isPasswordDialogOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setIsPasswordDialogOpen(false)} />
+            <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">修改密码</h3>
+
+              {passwordError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm rounded-lg">{passwordError}</div>
+              )}
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">原密码</label>
+                  <input
+                    type="password"
+                    value={passwordForm.oldPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    placeholder="请输入原密码"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">新密码</label>
+                  <input
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    placeholder="请输入新密码（至少6位）"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">确认新密码</label>
+                  <input
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                    placeholder="请再次输入新密码"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => setIsPasswordDialogOpen(false)}
+                  className="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                >
+                  取消
+                </button>
+                <button
+                  disabled={passwordLoading}
+                  onClick={async () => {
+                    setPasswordError('');
+                    if (!passwordForm.oldPassword) { setPasswordError('请输入原密码'); return; }
+                    if (passwordForm.newPassword.length < 6) { setPasswordError('新密码至少6位'); return; }
+                    if (passwordForm.newPassword !== passwordForm.confirmPassword) { setPasswordError('两次输入的新密码不一致'); return; }
+                    try {
+                      setPasswordLoading(true);
+                      await usersApi.changePassword(passwordForm.oldPassword, passwordForm.newPassword);
+                      setIsPasswordDialogOpen(false);
+                      alert('密码修改成功，请重新登录');
+                      handleLogout();
+                    } catch (err) {
+                      setPasswordError((err as Error).message || '修改失败');
+                    } finally {
+                      setPasswordLoading(false);
+                    }
+                  }}
+                  className="px-4 py-2 text-sm text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+                >
+                  {passwordLoading ? '提交中...' : '确认修改'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AuthProvider>
   );
