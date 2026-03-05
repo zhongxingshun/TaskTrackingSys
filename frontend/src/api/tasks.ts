@@ -75,7 +75,7 @@ export const tasksApi = {
    */
   async updateDeviceStatus(taskId: string, deviceId: string, status: string): Promise<Task> {
     return apiClient.patch(`/tasks/${taskId}/devices/${deviceId}/status`, null, {
-      params: { status }
+      params: { new_status: status }
     });
   },
 
@@ -84,7 +84,7 @@ export const tasksApi = {
    */
   async batchUpdateDeviceStatus(taskId: string, deviceIds: string[], status: string): Promise<Task> {
     return apiClient.patch(`/tasks/${taskId}/devices/batch-status`, null, {
-      params: { device_ids: deviceIds, status }
+      params: { device_ids: deviceIds, new_status: status }
     });
   },
 
